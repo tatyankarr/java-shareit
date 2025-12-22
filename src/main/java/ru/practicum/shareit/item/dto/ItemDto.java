@@ -20,7 +20,5 @@ public class ItemDto {
 
     @NotNull(message = "Available не может быть пустым")
     private Boolean available;
-    
     private Long requestId;
 }
-
