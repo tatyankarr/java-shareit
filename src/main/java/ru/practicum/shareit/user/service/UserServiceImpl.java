@@ -19,25 +19,8 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
-
-    private void validateEmailFormat(String email) {
-        if (email == null) {
-            return;
-        }
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            throw new ValidationException("Некорректный email");
-        }
-    }
-
     @Override
     public UserDto create(UserDto userDto) {
-        if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
-            throw new ValidationException("Email не может быть пустым");
-        }
-
-        validateEmailFormat(userDto.getEmail());
 
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new ConflictException("Email уже используется");

@@ -21,17 +21,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(Long userId, ItemDto itemDto) {
-        if (itemDto.getAvailable() == null) {
-            throw new ValidationException("Available не может быть пустым");
-        }
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new ValidationException("Name обязательно");
-        }
-        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new ValidationException("Description обязательно");
-        }
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+
         Item item = ItemMapper.toItem(itemDto, owner, null);
         item = itemRepository.save(item);
         return ItemMapper.toItemDto(item);
@@ -71,6 +63,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> search(Long userId, String text) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+
         if (text == null || text.isBlank()) return Collections.emptyList();
 
         return itemRepository.search(text.toLowerCase()).stream()
