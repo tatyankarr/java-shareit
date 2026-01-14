@@ -19,6 +19,7 @@ public class ItemMapper {
     }
 
     public Item toItem(ItemDto dto, User owner, ItemRequest request) {
+        if (dto == null || owner == null) return null;
         return new Item(
                 dto.getId(),
                 dto.getName(),
