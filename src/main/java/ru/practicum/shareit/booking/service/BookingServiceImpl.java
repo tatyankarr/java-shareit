@@ -121,6 +121,7 @@ public class BookingServiceImpl implements BookingService {
             case "FUTURE":
                 bookings = bookingRepository
                         .findByBooker_IdAndStartAfter(userId, now, sort);
+                break;
             case "WAITING":
                 bookings = bookingRepository
                         .findByBooker_IdAndStatus(userId, BookingStatus.WAITING, sort);
@@ -158,6 +159,7 @@ public class BookingServiceImpl implements BookingService {
             case "FUTURE":
                 bookings = bookingRepository
                         .findByItem_Owner_IdAndStartAfter(userId, now, sort);
+                break;
             case "WAITING":
                 bookings = bookingRepository
                         .findByItem_Owner_IdAndStatus(userId, BookingStatus.WAITING, sort);
