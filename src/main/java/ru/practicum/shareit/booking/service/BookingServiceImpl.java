@@ -106,24 +106,33 @@ public class BookingServiceImpl implements BookingService {
 
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
         List<Booking> bookings;
+        LocalDateTime now = LocalDateTime.now();
 
         switch (state.toUpperCase()) {
             case "CURRENT":
-                bookings = bookingRepository.findByBooker_IdAndStartAfter(userId, LocalDateTime.now(), sort);
+                bookings = bookingRepository
+                        .findByBooker_IdAndStartLessThanEqualAndEndGreaterThanEqual(
+                                userId, now, now, sort);
                 break;
             case "PAST":
-                bookings = bookingRepository.findByBooker_IdAndEndBefore(userId, LocalDateTime.now(), sort);
+                bookings = bookingRepository
+                        .findByBooker_IdAndEndBefore(userId, now, sort);
                 break;
+            case "FUTURE":
+                bookings = bookingRepository
+                        .findByBooker_IdAndStartAfter(userId, now, sort);
             case "WAITING":
-                bookings = bookingRepository.findByBooker_IdAndStatus(userId, BookingStatus.WAITING, sort);
+                bookings = bookingRepository
+                        .findByBooker_IdAndStatus(userId, BookingStatus.WAITING, sort);
                 break;
             case "REJECTED":
-                bookings = bookingRepository.findByBooker_IdAndStatus(userId, BookingStatus.REJECTED, sort);
+                bookings = bookingRepository
+                        .findByBooker_IdAndStatus(userId, BookingStatus.REJECTED, sort);
                 break;
             default:
-                bookings = bookingRepository.findByBooker_Id(userId, sort);
+                bookings = bookingRepository
+                        .findByBooker_Id(userId, sort);
         }
-
         return bookings.stream().map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
     }
 
@@ -134,18 +143,33 @@ public class BookingServiceImpl implements BookingService {
 
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
         List<Booking> bookings;
+        LocalDateTime now = LocalDateTime.now();
 
         switch (state.toUpperCase()) {
+            case "CURRENT":
+                bookings = bookingRepository
+                        .findByItem_Owner_IdAndStartLessThanEqualAndEndGreaterThanEqual(
+                                userId, now, now, sort);
+                break;
+            case "PAST":
+                bookings = bookingRepository
+                        .findByItem_Owner_IdAndEndBefore(userId, now, sort);
+                break;
+            case "FUTURE":
+                bookings = bookingRepository
+                        .findByItem_Owner_IdAndStartAfter(userId, now, sort);
             case "WAITING":
-                bookings = bookingRepository.findByItem_Owner_IdAndStatus(userId, BookingStatus.WAITING, sort);
+                bookings = bookingRepository
+                        .findByItem_Owner_IdAndStatus(userId, BookingStatus.WAITING, sort);
                 break;
             case "REJECTED":
-                bookings = bookingRepository.findByItem_Owner_IdAndStatus(userId, BookingStatus.REJECTED, sort);
+                bookings = bookingRepository
+                        .findByItem_Owner_IdAndStatus(userId, BookingStatus.REJECTED, sort);
                 break;
             default:
-                bookings = bookingRepository.findByItem_Owner_Id(userId, sort);
+                bookings = bookingRepository
+                        .findByItem_Owner_Id(userId, sort);
         }
-
         return bookings.stream().map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
     }
 }

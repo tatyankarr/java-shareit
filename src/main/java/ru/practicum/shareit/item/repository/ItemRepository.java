@@ -7,7 +7,7 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    List<Item> findByOwnerId(Long ownerId);
+    List<Item> findByOwner_Id(Long ownerId);
 
     @Query(" select i from Item i " +
             "where (upper(i.name) like upper(concat('%', ?1, '%')) " +

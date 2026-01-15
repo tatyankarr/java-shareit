@@ -71,20 +71,16 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
-        LocalDateTime now = LocalDateTime.now();
-
-        boolean hasBooking = bookingRepository.findAll().stream()
-                .filter(b -> b.getBooker().getId().equals(userId))
-                .filter(b -> b.getItem().getId().equals(itemId))
-                .filter(b -> b.getStatus() == BookingStatus.APPROVED)
-                .anyMatch(b -> b.getEnd().isBefore(now));
+        boolean hasBooking = bookingRepository
+                .existsByBookerIdAndItemIdAndStatusAndEndBefore(
+                        userId, itemId, BookingStatus.APPROVED, LocalDateTime.now());
 
         if (!hasBooking) {
             throw new ValidationException("Вы не можете оставить отзыв: аренда не найдена или еще не завершена");
         }
 
         Comment comment = CommentMapper.toComment(commentDto, item, user);
-        comment.setCreated(now);
+        comment.setCreated(LocalDateTime.now());
 
         Comment savedComment = commentRepository.save(comment);
         return CommentMapper.toCommentDto(savedComment);
@@ -112,7 +108,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemResponseDto> getAllByOwner(Long userId) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        return itemRepository.findByOwnerId(userId).stream()
+        return itemRepository.findByOwner_Id(userId).stream()
                 .map(ItemResponseMapper::toItemResponseDto)
                 .map(this::addBookings)
                 .peek(dto -> {
