@@ -53,4 +53,50 @@ class UserDtoJsonTest {
         assertThat(dto.getName()).isEqualTo("Test User");
         assertThat(dto.getEmail()).isEqualTo("test@test.com");
     }
+
+    @Test
+    void userDto_whenOnlyIdIsSet_shouldSerializeProperly() throws IOException {
+        UserDto dto = new UserDto();
+        dto.setId(1L);
+
+        JsonContent<UserDto> result = jsonUserDto.write(dto);
+
+        assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
+        assertThat(result).extractingJsonPathStringValue("$.name").isNull();
+        assertThat(result).extractingJsonPathStringValue("$.email").isNull();
+    }
+
+    @Test
+    void userDto_whenEmptyObject_shouldDeserializeProperly() throws IOException {
+        String json = "{}";
+        UserDto dto = jsonUserDto.parseObject(json);
+
+        assertThat(dto.getId()).isNull();
+        assertThat(dto.getName()).isNull();
+        assertThat(dto.getEmail()).isNull();
+    }
+
+    @Test
+    void userDtoSerialization_withSpecialCharactersInName() throws IOException {
+        UserDto dto = new UserDto(1L, "Иван Иванов", "ivan@test.com");
+
+        JsonContent<UserDto> result = jsonUserDto.write(dto);
+
+        assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("Иван Иванов");
+        assertThat(result).extractingJsonPathStringValue("$.email").isEqualTo("ivan@test.com");
+    }
+
+    @Test
+    void userDtoDeserialization_withSpecialCharacters() throws IOException {
+        String json = "{" +
+                "\"id\": 1," +
+                "\"name\": \"Иван Иванов\"," +
+                "\"email\": \"ivan@test.com\"" +
+                "}";
+
+        UserDto dto = jsonUserDto.parseObject(json);
+
+        assertThat(dto.getName()).isEqualTo("Иван Иванов");
+        assertThat(dto.getEmail()).isEqualTo("ivan@test.com");
+    }
 }

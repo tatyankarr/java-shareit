@@ -12,6 +12,7 @@ import org.springframework.boot.test.json.JsonContent;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,6 +21,9 @@ class ItemRequestDtoJsonTest {
 
     @Autowired
     private JacksonTester<ItemRequestDto> jsonItemRequestDto;
+
+    @Autowired
+    private JacksonTester<ItemRequestResponseDto> jsonItemRequestResponseDto;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -54,5 +58,35 @@ class ItemRequestDtoJsonTest {
         assertThat(dto.getDescription()).isEqualTo("Нужна дрель");
         assertThat(dto.getRequestorId()).isEqualTo(123L);
         assertThat(dto.getCreated()).isEqualTo(LocalDateTime.of(2024, 1, 15, 10, 30, 0));
+    }
+
+    @Test
+    void itemRequestResponseDtoSerializationTest() throws IOException {
+        LocalDateTime created = LocalDateTime.of(2024, 1, 15, 10, 30, 0);
+        ItemForRequestDto itemDto = new ItemForRequestDto(1L, "Дрель", 456L);
+        ItemRequestResponseDto dto = new ItemRequestResponseDto(
+                1L, "Нужна дрель", created, List.of(itemDto)
+        );
+
+        JsonContent<ItemRequestResponseDto> result = jsonItemRequestResponseDto.write(dto);
+
+        assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
+        assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo("Нужна дрель");
+        assertThat(result).extractingJsonPathStringValue("$.created")
+                .isEqualTo(created.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        assertThat(result).extractingJsonPathNumberValue("$.items[0].id").isEqualTo(1);
+        assertThat(result).extractingJsonPathStringValue("$.items[0].name").isEqualTo("Дрель");
+        assertThat(result).extractingJsonPathNumberValue("$.items[0].ownerId").isEqualTo(456);
+    }
+
+    @Test
+    void itemForRequestDtoSerializationTest() throws IOException {
+        ItemForRequestDto dto = new ItemForRequestDto(1L, "Дрель", 123L);
+
+        String json = objectMapper.writeValueAsString(dto);
+
+        assertThat(json).contains("\"id\":1");
+        assertThat(json).contains("\"name\":\"Дрель\"");
+        assertThat(json).contains("\"ownerId\":123");
     }
 }
