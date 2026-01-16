@@ -80,9 +80,11 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
+        LocalDateTime checkTime = LocalDateTime.now().minusSeconds(1);
+
         boolean hasBooking = bookingRepository
                 .existsByBookerIdAndItemIdAndStatusAndEndBefore(
-                        userId, itemId, BookingStatus.APPROVED, LocalDateTime.now());
+                        userId, itemId, BookingStatus.APPROVED, checkTime);
 
         if (!hasBooking) {
             throw new ValidationException("Вы не можете оставить отзыв: аренда не найдена или еще не завершена");
