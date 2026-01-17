@@ -3,12 +3,14 @@ package ru.practicum.shareit.request.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemForRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -25,9 +27,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto create(Long userId, ItemRequestDto dto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+
         ItemRequest request = new ItemRequest();
         request.setDescription(dto.getDescription());
-        request.setRequestor(userRepository.getReferenceById(userId));
+        request.setRequestor(user);
         request.setCreated(LocalDateTime.now());
 
         ItemRequest saved = requestRepository.save(request);
@@ -59,7 +63,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestResponseDto getById(Long userId, Long requestId) {
         ItemRequest request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Запрос не найден"));
+                .orElseThrow(() -> new NotFoundException("Запрос не найден"));
 
         return mapToResponse(request);
     }
